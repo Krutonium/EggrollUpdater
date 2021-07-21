@@ -50,7 +50,7 @@ namespace EggrollUpdater
             Console.WriteLine("Unpacking...");
             Program program = new Program();
             
-            var ExtractPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam/root/compatibilitytools.d/", Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(DownloadedRelease)));
+            var ExtractPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam/root/compatibilitytools.d/");
             Console.WriteLine(ExtractPath);
             program.ExtractTGZ(DownloadedRelease, ExtractPath);
             Console.WriteLine("Done! Just restart steam!");
