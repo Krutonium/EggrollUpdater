@@ -23,6 +23,12 @@ namespace EggrollUpdater
                     "GloriousEggroll/proton-ge-custom/releases/latest"));
             
             Console.WriteLine("Latest Release is " + Release.name);
+            var ExtractPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam/root/compatibilitytools.d/");
+            var folderName = Path.Combine(ExtractPath, Release.name);
+            if(Directory.Exists(folderName)){
+                Console.WriteLine("You're already up to date.");
+                Environment.Exit(0);
+            }
             Console.WriteLine("Downloading...");
             client.DownloadProgressChanged += ClientOnDownloadProgressChanged;
 
@@ -50,9 +56,10 @@ namespace EggrollUpdater
             Console.WriteLine("Unpacking...");
             Program program = new Program();
             
-            var ExtractPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam/root/compatibilitytools.d/");
+            
             Console.WriteLine(ExtractPath);
             program.ExtractTGZ(DownloadedRelease, ExtractPath);
+            File.Delete(DownloadedRelease);
             Console.WriteLine("Done! Just restart steam!");
             Environment.Exit(0);
         }
