@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
@@ -13,8 +14,12 @@ namespace EggrollUpdater
     {
         static WebClient client = new WebClient();
         private static bool downloadDone = false;
+        private static List<string> releases = new List<string>();
         static void Main(string[] args)
         {
+            
+            
+            
             client.Headers["User-Agent"] = "Mozilla/5.0 (X11; Linux i686; rv:90.0) Gecko/20100101 Firefox/90.0";
             
             var Release = JsonConvert.DeserializeObject<Release>(
@@ -24,10 +29,24 @@ namespace EggrollUpdater
             
             Console.WriteLine("Latest Release is " + Release.name);
             var ExtractPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".steam/root/compatibilitytools.d/");
-            var folderName = Path.Combine(ExtractPath, Release.name);
-            if(Directory.Exists(folderName)){
-                Console.WriteLine("You're already up to date.");
-                Environment.Exit(0);
+            var configpath = Path.Combine(ExtractPath, "releases.json");
+            if (File.Exists(configpath))
+            {
+                var releases = JsonConvert.DeserializeObject<List<string>>(File.ReadAllText(configpath));
+                if (releases.Contains(Release.name))
+                {
+                    Console.WriteLine("Already up to date!");
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    releases.Add(Release.name);
+                }
+            }
+            else
+            {
+                //The file didn't exist, so we're making a new one.
+                releases.Add(Release.name);
             }
             Console.WriteLine("Downloading...");
             client.DownloadProgressChanged += ClientOnDownloadProgressChanged;
@@ -55,11 +74,14 @@ namespace EggrollUpdater
             bar.Dispose();
             Console.WriteLine("Unpacking...");
             Program program = new Program();
-            
-            
             Console.WriteLine(ExtractPath);
             program.ExtractTGZ(DownloadedRelease, ExtractPath);
             File.Delete(DownloadedRelease);
+            if (File.Exists(configpath))
+            {
+                File.Delete(configpath);
+            }
+            File.WriteAllText(configpath,  JsonConvert.SerializeObject(releases, Formatting.Indented));
             Console.WriteLine("Done! Just restart steam!");
             Environment.Exit(0);
         }
